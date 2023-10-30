@@ -1,4 +1,4 @@
-package com.supply.inventoryservice.dto;
+package com.supply.inventoryservice.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

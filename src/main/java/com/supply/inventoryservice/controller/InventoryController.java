@@ -1,9 +1,8 @@
 package com.supply.inventoryservice.controller;
 
-import com.supply.inventoryservice.dto.Inventory;
+import com.supply.inventoryservice.entity.Inventory;
 import com.supply.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

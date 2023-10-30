@@ -1,6 +1,6 @@
 package com.supply.inventoryservice.service;
 
-import com.supply.inventoryservice.dto.Inventory;
+import com.supply.inventoryservice.entity.Inventory;
 import com.supply.inventoryservice.repo.InventoryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

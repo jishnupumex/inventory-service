@@ -61,6 +61,12 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--        Common DTO-->
+		<dependency>
+			<groupId>com.scm</groupId>
+			<artifactId>commonDto</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
