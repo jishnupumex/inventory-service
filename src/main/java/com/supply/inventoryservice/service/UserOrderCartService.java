@@ -21,11 +21,9 @@ public class UserOrderCartService {
         return userCartRepository.save(userCart);
     }
 
-//    public UserCart updateUserCart(UserCart userCart) {
-//        return userCartRepository.
-//        (userCart);
-//    }
-
+    public List<UserCart> getUserCartByUserIdAndProdId(Long userId, Long prodId) {
+        return (List<UserCart>) userCartRepository.findByUserIdAndProdId(userId, prodId);
+    }
     public UserCart updateUserCart(UserCart userCart) {
         // Retrieve the existing UserCart entry by userId and prodId
         UserCart existingUserCart = userCartRepository.findByUserIdAndProdId(userCart.getUserId(), userCart.getProdId());

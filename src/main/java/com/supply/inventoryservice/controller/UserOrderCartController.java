@@ -21,6 +21,13 @@ public class UserOrderCartController {
         return userOrderCartService.saveUserCart(userCart);
     }
 
+    @GetMapping("/get-cart")
+    public List<UserCart> getUserCartByUserIdAndProdId(
+            @RequestParam Long userId,
+            @RequestParam Long prodId
+    ) {
+        return userOrderCartService.getUserCartByUserIdAndProdId(userId, prodId);
+    }
     // Cart page product quantity update API
     // Parameters - UserID, ProdID, ProdQty
     @PutMapping("/update-prod")
