@@ -1,5 +1,7 @@
 package com.supply.inventoryservice.service;
 
+import com.scm.UserOrder;
+import com.supply.inventoryservice.entity.Inventory;
 import com.supply.inventoryservice.entity.UserCart;
 import com.supply.inventoryservice.repo.UserCartRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -11,14 +13,40 @@ import java.util.List;
 @Service
 public class UserOrderCartService {
     private final UserCartRepository userCartRepository;
+    private final InventoryService inventoryService;
+
 
     @Autowired
-    public UserOrderCartService(UserCartRepository userCartRepository) {
+    public UserOrderCartService(UserCartRepository userCartRepository, InventoryService inventoryService) {
         this.userCartRepository = userCartRepository;
+        this.inventoryService = inventoryService;
     }
 
-    public UserCart saveUserCart(UserCart userCart) {
+    public UserCart saveUserCart(Long userId, Long prodId) {
+        // Retrieve the product from the Inventory table based on prodID
+        Inventory product = inventoryService.getInventoryByProdId(prodId);
+
+        // Create a new UserCart entry with the product details
+        UserCart userCart = new UserCart();
+        userCart.setUserId(userId);
+        userCart.setProdId(product.getProdId());
+        userCart.setProdName(product.getProdName());
+        userCart.setProdDesc(product.getProdDesc());
+        userCart.setProdQty(1);
+        userCart.setProdType(product.getProdType());
+        userCart.setProdPrice(product.getProdPrice());
+        userCart.setTotalPrice(userCart.getProdQty()*userCart.getProdPrice());
+        // Set other fields as needed
+
+        // Save the userCart entry
         return userCartRepository.save(userCart);
+    }
+
+    public UserOrder getOrdersByUserId(Long userId) {
+        List<UserCart> orders = userCartRepository.findByUserId(userId);
+        UserOrder response = new UserOrder();
+//        response.setOrders(orders);
+        return response;
     }
 
     public List<UserCart> getUserCartByUserIdAndProdId(Long userId, Long prodId) {
@@ -56,4 +84,5 @@ public class UserOrderCartService {
     public List<UserCart> getUserCartByUserId(Long userId) {
         return userCartRepository.findByUserId(userId);
     }
+
 }

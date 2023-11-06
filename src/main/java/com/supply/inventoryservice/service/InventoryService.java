@@ -38,6 +38,16 @@ public class InventoryService {
         return savedInventory;
     }
 
+    public Inventory getInventoryByProdId(Long prodId) {
+        Optional<Inventory> inventoryOptional = inventoryRepo.findById(prodId);
+
+        if (inventoryOptional.isPresent()) {
+            return inventoryOptional.get();
+        }
+
+        // Handle the case where the inventory entry doesn't exist.
+        throw new EntityNotFoundException("Inventory entry not found for prodId: " + prodId);
+    }
     @Transactional
     public void updateInventory(Long prodId, int prodQtyToAdd) {
         // Retrieve the existing inventory entry by prodId

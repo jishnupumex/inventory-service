@@ -12,8 +12,8 @@ import com.scm.UserOrder;
 public class OrderFulfillmentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderFulfillmentService.class);
 
-    private KafkaTemplate<String, String> kafkaTemplate;
-    private InventoryRepo inventoryRepo;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final InventoryRepo inventoryRepo;
 
     public OrderFulfillmentService(InventoryRepo inventoryRepo, KafkaTemplate<String, String> kafkaTemplate) {
         this.inventoryRepo = inventoryRepo;

@@ -1,9 +1,14 @@
 package com.supply.inventoryservice.controller;
 
+import com.scm.UserOrder;
 import com.supply.inventoryservice.entity.UserCart;
 import com.supply.inventoryservice.service.UserOrderCartService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -12,13 +17,18 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:8000")
 public class UserOrderCartController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserOrderCartController.class);
     @Autowired
     private final UserOrderCartService userOrderCartService;
 
-    //    From home page adding to cart API         Parameters - UserID, ProdID
     @PostMapping("/add")
-    public UserCart addUserCart(@RequestBody UserCart userCart) {
-        return userOrderCartService.saveUserCart(userCart);
+    public ResponseEntity<UserCart> getProductDetails(@RequestBody UserOrder request) {
+        try {
+            UserCart productDetails = userOrderCartService.saveUserCart((long) request.getUserId(), (long) request.getProdId());
+            return ResponseEntity.ok(productDetails);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/get-cart")
