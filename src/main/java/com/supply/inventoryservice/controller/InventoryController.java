@@ -13,7 +13,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/inventories")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:8000")
+@CrossOrigin(origins = "*")
 public class InventoryController {
 
     private final InventoryService inventoryService;

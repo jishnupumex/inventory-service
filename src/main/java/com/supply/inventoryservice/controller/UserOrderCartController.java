@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/user-cart")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:8000")
+@CrossOrigin(origins = "*")
 public class UserOrderCartController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserOrderCartController.class);
     @Autowired

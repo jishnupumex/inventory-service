@@ -22,7 +22,7 @@ public class InventoryService {
     private final OrderFulfillmentService inventoryStockStatusService;
     private final SupplierStockAddingService supplierStockAddingService;
     private final KafkaTemplate<String, Inventory> kafkaTemplate;
-    private static final String KAFKA_TOPIC = "inventory";
+//    private static final String KAFKA_TOPIC = "Inventory";
 
     @Autowired
     public InventoryService(InventoryRepo inventoryRepo, OrderFulfillmentService inventoryStockStatusService, SupplierStockAddingService supplierStockAddingService, KafkaTemplate<String, Inventory> kafkaTemplate) {
@@ -34,7 +34,7 @@ public class InventoryService {
 
     public Inventory saveInventory(Inventory inventory) {
         Inventory savedInventory = inventoryRepo.save(inventory);
-        kafkaTemplate.send(KAFKA_TOPIC, savedInventory);
+//        kafkaTemplate.send(KAFKA_TOPIC, savedInventory);
         return savedInventory;
     }
 
@@ -70,7 +70,7 @@ public class InventoryService {
             savedInventoryList.add(savedInventory);
 
             // Publish the saved inventory entry to Kafka
-            kafkaTemplate.send(KAFKA_TOPIC, savedInventory);
+//            kafkaTemplate.send(KAFKA_TOPIC, savedInventory);
         }
         return savedInventoryList;
     }

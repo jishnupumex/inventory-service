@@ -8,6 +8,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import com.scm.UserOrder;
 
+import java.util.Objects;
+
 @Service
 public class OrderFulfillmentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderFulfillmentService.class);
@@ -41,5 +43,11 @@ public class OrderFulfillmentService {
         String message = "Product " + userOrder.getProdName() + " is " + availability;
         kafkaTemplate.send("OrderFulfillment", message);
         LOGGER.info("Sending order fulfillment message to logistics service: {}", message);
+    }
+
+    public void sendProductToLogisticsFromSupplier( String availability) {
+        if (Objects.equals(availability, "Stock Added"))
+        kafkaTemplate.send("OrderFulfillment", availability);
+        LOGGER.info("Sending order fulfillment message to logistics service: {}", availability);
     }
 }

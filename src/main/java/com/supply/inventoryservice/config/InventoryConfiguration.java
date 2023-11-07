@@ -27,4 +27,23 @@ public class InventoryConfiguration {
                 .build();
     }
 
+    @Value("${spring.kafka.topic.name.topic3}")
+    private String topicSupplierOrder;
+
+    @Bean
+    public NewTopic OrderSupplierTopic(){
+        return TopicBuilder.name(topicSupplierOrder)
+                .build();
+    }
+
+
+    @Value("${spring.kafka.topic.name.topic4}")
+    private String topicStockUpdate;
+
+    @Bean
+    public NewTopic StockOrderTopic(){
+        return TopicBuilder.name(topicStockUpdate)
+                .build();
+    }
+
 }

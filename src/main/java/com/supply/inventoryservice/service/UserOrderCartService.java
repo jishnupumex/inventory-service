@@ -62,7 +62,6 @@ public class UserOrderCartService {
 
             // Update the prodDesc with the new value
             existingUserCart.setProdDesc(userCart.getProdDesc());
-
             existingUserCart.setProdName(userCart.getProdName());
             existingUserCart.setProdPrice(userCart.getProdPrice());
             existingUserCart.setProdId(userCart.getProdId());
@@ -75,9 +74,6 @@ public class UserOrderCartService {
             // Save the updated UserCart entry
             return userCartRepository.save(existingUserCart);
         } else {
-            // Handle the case where the UserCart entry doesn't exist
-            // You can throw an exception or handle it as per your application's requirements.
-            // For example, you can return an error response.
             throw new EntityNotFoundException("UserCart entry not found for userId: " + userCart.getUserId() + " and prodId: " + userCart.getProdId());
         }
     }
