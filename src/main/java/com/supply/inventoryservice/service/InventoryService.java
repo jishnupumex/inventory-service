@@ -1,36 +1,32 @@
 package com.supply.inventoryservice.service;
 
-import com.scm.UserOrder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.supply.inventoryservice.entity.Inventory;
+import com.supply.inventoryservice.entity.UserOrders;
 import com.supply.inventoryservice.repo.InventoryRepo;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class InventoryService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InventoryService.class);
+    
     private final InventoryRepo inventoryRepo;
     private final OrderFulfillmentService inventoryStockStatusService;
     private final SupplierStockAddingService supplierStockAddingService;
     private final KafkaTemplate<String, Inventory> kafkaTemplate;
 //    private static final String KAFKA_TOPIC = "Inventory";
 
-    @Autowired
-    public InventoryService(InventoryRepo inventoryRepo, OrderFulfillmentService inventoryStockStatusService, SupplierStockAddingService supplierStockAddingService, KafkaTemplate<String, Inventory> kafkaTemplate) {
-        this.inventoryRepo = inventoryRepo;
-        this.inventoryStockStatusService = inventoryStockStatusService;
-        this.supplierStockAddingService = supplierStockAddingService;
-        this.kafkaTemplate = kafkaTemplate;
-    }
+    private final ObjectMapper objectMapper;
 
     public Inventory saveInventory(Inventory inventory) {
         Inventory savedInventory = inventoryRepo.save(inventory);
@@ -44,7 +40,6 @@ public class InventoryService {
         if (inventoryOptional.isPresent()) {
             return inventoryOptional.get();
         }
-
         // Handle the case where the inventory entry doesn't exist.
         throw new EntityNotFoundException("Inventory entry not found for prodId: " + prodId);
     }
@@ -62,7 +57,6 @@ public class InventoryService {
         }
     }
 
-
     public List<Inventory> saveInventoryList(List<Inventory> inventoryList) {
         List<Inventory> savedInventoryList = new ArrayList<>();
         for (Inventory inventory : inventoryList) {
@@ -70,7 +64,7 @@ public class InventoryService {
             savedInventoryList.add(savedInventory);
 
             // Publish the saved inventory entry to Kafka
-//            kafkaTemplate.send(KAFKA_TOPIC, savedInventory);
+            // kafkaTemplate.send(KAFKA_TOPIC, savedInventory);
         }
         return savedInventoryList;
     }
@@ -85,22 +79,21 @@ public class InventoryService {
 
 
     @KafkaListener(topics = "${spring.kafka.topic.name.topic1}", groupId = "${spring.kafka.consumer.group-id.topic1}")
-    public void consumeUserOrderKafkaTopic(UserOrder order) {
-        LOGGER.info("User Order received -> {}", order.toString());
+    public void consumeUserOrderKafkaTopic(String userOrdersAsString) {
+        try {
+            UserOrders userOrders = objectMapper.readValue(userOrdersAsString,UserOrders.class);
+            log.info("User Order received -> {}", userOrders);
+            int availableQty = inventoryRepo.getAvailableQty(userOrders.getProdId());
 
-        // Retrieve availableQty from the Inventory service
-        int availableQty = inventoryRepo.getAvailableQty((long) order.getProdId());
-
-        // Trigger the InventoryStockStatusService
-        String availability = inventoryStockStatusService.checkProductAvailability(order);
-
-        if (order.getProdQty() > availableQty) {
-            // Send a request to the Supplier if prodQty is low based on availableQty
-            supplierStockAddingService.sendRequestToSupplier(order, availableQty);
-        }
-        else{
-            // Send the product availability message
-            inventoryStockStatusService.sendProductToLogistics(order, availability);
-        }
+            if (userOrders.getProdQty() < availableQty) {
+                inventoryStockStatusService.sendProductToLogistics(userOrders);
+            }
+            else{
+                int requiredQty = userOrders.getProdQty() - availableQty;
+                supplierStockAddingService.sendRequestToSupplier(userOrders.getProdId(),requiredQty,userOrders.getUserOrderId());
+            }
+    } catch (Exception e){
+        log.error("Error",e);}
     }
+
 }

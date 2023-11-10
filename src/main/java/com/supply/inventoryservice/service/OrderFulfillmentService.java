@@ -1,27 +1,25 @@
 package com.supply.inventoryservice.service;
 
 import com.supply.inventoryservice.entity.Inventory;
+import com.supply.inventoryservice.entity.OrderStatus;
+import com.supply.inventoryservice.entity.UserOrders;
 import com.supply.inventoryservice.repo.InventoryRepo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.supply.inventoryservice.repo.UserOrdersRepo;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import com.scm.UserOrder;
 
 import java.util.Objects;
-
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class OrderFulfillmentService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderFulfillmentService.class);
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<Object, UserOrders> kafkaTemplate;
     private final InventoryRepo inventoryRepo;
-
-    public OrderFulfillmentService(InventoryRepo inventoryRepo, KafkaTemplate<String, String> kafkaTemplate) {
-        this.inventoryRepo = inventoryRepo;
-        this.kafkaTemplate = kafkaTemplate;
-    }
-
+    private final UserOrdersRepo userOrdersRepo;
     public String checkProductAvailability(UserOrder userOrder) {
         int prodId = userOrder.getProdId();
         int userOrderQty = userOrder.getProdQty();
@@ -39,15 +37,17 @@ public class OrderFulfillmentService {
         return "Not Available";
     }
 
-    public void sendProductToLogistics(UserOrder userOrder, String availability) {
-        String message = "Product " + userOrder.getProdName() + " is " + availability;
-        kafkaTemplate.send("OrderFulfillment", message);
-        LOGGER.info("Sending order fulfillment message to logistics service: {}", message);
+    public void sendProductToLogistics(UserOrders userOrder) {
+        userOrder.setOrderStatus(OrderStatus.AVAILABLE);
+        UserOrders savedUserOrder = userOrdersRepo.save(userOrder);
+
+        kafkaTemplate.send("OrderFulfillment", savedUserOrder);
+        log.info("Sending order fulfillment message to logistics service: {}", savedUserOrder);
     }
 
-    public void sendProductToLogisticsFromSupplier( String availability) {
-        if (Objects.equals(availability, "Stock Added"))
-        kafkaTemplate.send("OrderFulfillment", availability);
-        LOGGER.info("Sending order fulfillment message to logistics service: {}", availability);
-    }
+//    public void sendProductToLogisticsFromSupplier(UserOrders availability) {
+//        if (Objects.equals(availability, "Stock Added"))
+//            kafkaTemplate.send("OrderFulfillment", availability);
+//            log.info("Sending order fulfillment message to logistics service: {}", availability);
+//    }
 }
