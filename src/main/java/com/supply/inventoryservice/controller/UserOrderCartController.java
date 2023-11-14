@@ -40,7 +40,7 @@ public class UserOrderCartController {
     }
     // Cart page product quantity update API
     // Parameters - UserID, ProdID, ProdQty
-    @PutMapping("/update-prod")
+    @PutMapping("/update")
     public UserCart updateUserCart(@RequestBody UserCart userCart) {
         return userOrderCartService.updateUserCart(userCart);
     }

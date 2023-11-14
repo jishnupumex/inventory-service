@@ -54,19 +54,11 @@ public class UserOrderCartService {
     }
     public UserCart updateUserCart(UserCart userCart) {
         // Retrieve the existing UserCart entry by userId and prodId
-        UserCart existingUserCart = userCartRepository.findByUserIdAndProdId(userCart.getUserId(), userCart.getProdId());
+        UserCart existingUserCart = userCartRepository.findByUserIdAndProdId(userCart.getUserId(),userCart.getProdId());
 
         if (existingUserCart != null) {
             // Update the prodQty with the new value
             existingUserCart.setProdQty(userCart.getProdQty());
-
-            // Update the prodDesc with the new value
-            existingUserCart.setProdDesc(userCart.getProdDesc());
-            existingUserCart.setProdName(userCart.getProdName());
-            existingUserCart.setProdPrice(userCart.getProdPrice());
-            existingUserCart.setProdId(userCart.getProdId());
-            existingUserCart.setProdImage(userCart.getProdImage());
-
 
             // Calculate and update the totalPrice based on the new prodQty and prodPrice
             existingUserCart.setTotalPrice(existingUserCart.getProdPrice() * existingUserCart.getProdQty());

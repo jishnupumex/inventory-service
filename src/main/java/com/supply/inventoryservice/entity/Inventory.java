@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-
 public class Inventory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
