@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.scm.UserOrder;
 
 import java.util.Objects;
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,14 +42,21 @@ public class OrderFulfillmentService {
     public void sendProductToLogistics(UserOrders userOrder) {
         userOrder.setOrderStatus(OrderStatus.AVAILABLE);
         UserOrders savedUserOrder = userOrdersRepo.save(userOrder);
+        Optional<Inventory> optionalInventory = inventoryRepo.findById(userOrder.getProdId());
 
-        kafkaTemplate.send("OrderFulfillment", savedUserOrder);
-        log.info("Sending order fulfillment message to logistics service: {}", savedUserOrder);
+        if (optionalInventory.isPresent()) {
+            Inventory existingInventory = optionalInventory.get();
+            // Update the prodQty with the new value
+            existingInventory.setProdQty(existingInventory.getProdQty() - userOrder.getProdQty());
+            // Save the updated Inventory entry
+            inventoryRepo.save(existingInventory);
+
+            // Produce Kafka topic to logistics
+            kafkaTemplate.send("OrderFulfillment", savedUserOrder);
+            log.info("Sending order fulfillment message to logistics service: {}", savedUserOrder);
+            log.info("Order ID : {}", savedUserOrder.getUserOrderId());
+        } else {
+            log.error("Inventory not found for prodId: {}", userOrder.getProdId());
+        }
     }
-
-//    public void sendProductToLogisticsFromSupplier(UserOrders availability) {
-//        if (Objects.equals(availability, "Stock Added"))
-//            kafkaTemplate.send("OrderFulfillment", availability);
-//            log.info("Sending order fulfillment message to logistics service: {}", availability);
-//    }
 }
